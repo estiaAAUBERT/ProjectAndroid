@@ -20,10 +20,10 @@ class ArticleDetailsAdapter (
         private val context: Context, items: Article, val handler: ListArticlesHandler
 ) : RecyclerView.Adapter<ArticleDetailsAdapter.ViewHolder>() {
     private val article: Article = items
-    private lateinit var DB: FavoriteDataBase
+    private lateinit var favDB: FavoriteDataBase
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        DB = FavoriteDataBase(context)
+        favDB = FavoriteDataBase(context)
         val view: View = LayoutInflater.from(parent.context)
                 .inflate(R.layout.articles_details, parent, false)
         return ViewHolder(view)
@@ -40,7 +40,7 @@ class ArticleDetailsAdapter (
         val dateString = sdfOut.format(date)
         holder.mArticleDate.text = dateString
         val sdfPattern = SimpleDateFormat("yyMMddHHmmssSSS")
-        val dateId: Date = article.publishedAt as Date
+        val dateId: Date = article.publishedAt
         val idString = sdfPattern.format(dateId)
         article.id = idString
         readCursorData(article, holder)
@@ -48,23 +48,23 @@ class ArticleDetailsAdapter (
 
         //Button on Click
         holder.mArticleFavorite.setOnClickListener {
-            if (article.favorite == false ){
+            if (article.favorite == 0 ){
                 holder.mArticleFavorite.setImageResource(R.drawable.ic_baseline_favoris_filled_24)
-                article.favorite = true
-                DB.insertIntoTheDatabase(
+                article.favorite = 1
+                favDB.insertIntoTheDatabase(
                         if (article.id!=null) article.id else "",
                         if (article.title!=null) article.title else "",
                         if (article.description!=null) article.description else "",
                         if (article.author!=null) article.author else "",
                         if (article.urlToImage!=null) article.urlToImage else "",
                         if (article.url!=null) article.url else "",
-                        true)
+                        1)
 
             }
             else
             {
-                article.favorite = false
-                DB.remove_fav(article.id)
+                article.favorite = 0
+                favDB.remove_fav(article.id)
                 holder.mArticleFavorite.setImageResource(R.drawable.ic_baseline_favoris_empty_24)
             }
         }
@@ -79,7 +79,7 @@ class ArticleDetailsAdapter (
         // Display  Avatar
         Glide.with(context)
                 .load(article.urlToImage)
-                .apply(RequestOptions.circleCropTransform())
+                .apply(RequestOptions.centerCropTransform())
                 .placeholder(R.drawable.ic_baseline_image_24)
                 .error(R.drawable.ic_baseline_image_24)
                 .skipMemoryCache(false)
@@ -117,19 +117,19 @@ class ArticleDetailsAdapter (
             article: Article,
             viewHolder: ArticleDetailsAdapter.ViewHolder
     ) {
-        val cursor = DB.read_all_data(article.id)
-        val db = DB.readableDatabase
+        val cursor = favDB.read_all_data(article.id)
+        val db = favDB.readableDatabase
         try {
             while (cursor.moveToNext()) {
                 val item_fav_status =
-                        cursor.getString(cursor.getColumnIndex(FavoriteDataBase.FAVORITE_STATUS)).toBoolean()
+                        cursor.getInt(cursor.getColumnIndex(FavoriteDataBase.FAVORITE_STATUS))
                 article.favorite = item_fav_status
 
                 //check fav status
-                if (item_fav_status) {
+                if (item_fav_status != null && item_fav_status == 1) {
                     viewHolder.mArticleFavorite.setImageResource(R.drawable.ic_baseline_favoris_filled_24)
 
-                } else if (!item_fav_status) {
+                } else if (item_fav_status != null && item_fav_status == 0) {
                     viewHolder.mArticleFavorite.setImageResource(R.drawable.ic_baseline_favoris_empty_24)
                 }
             }

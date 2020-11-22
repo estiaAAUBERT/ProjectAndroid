@@ -41,7 +41,7 @@ class HomeFragment : Fragment(){
 
         tousArticles.setOnClickListener {
             (activity as? NavigationListener)?.let {
-                it.showFragment(ListArticlesFragment())
+                it.showFragment(ListArticlesFragment("actuality"))
                 it.updateTitle(R.string.list_articles)
             }
         }

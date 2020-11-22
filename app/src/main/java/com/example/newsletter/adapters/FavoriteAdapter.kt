@@ -18,14 +18,13 @@ import java.util.Date
 
 
 class FavoriteAdapter(
-        private val context: Context, val handler: ListArticlesHandler, private var favoriteList : MutableList<ArticleFavorite>
-    ) : RecyclerView.Adapter<FavoriteAdapter.ViewHolder>() {
+        private val context: Context, val handler: ListArticlesHandler, private var favoriteList : MutableList<ArticleFavorite>) : RecyclerView.Adapter<FavoriteAdapter.ViewHolder>() {
 
-    private lateinit var DB: FavoriteDataBase
+    private lateinit var favDB: FavoriteDataBase
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        DB = FavoriteDataBase(context)
+        favDB = FavoriteDataBase(context)
         val view: View = LayoutInflater.from(parent.context)
                 .inflate(R.layout.articles_item, parent, false)
         return ViewHolder(view)
@@ -33,7 +32,8 @@ class FavoriteAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val article: ArticleFavorite = favoriteList[position]
-        var details = Article("",article.author,article.title,article.description,"", Source("",""),article.url,article.urlToImage,Date(),true)
+        var details = Article("",Source("",""),article.author,article.title,
+                article.description,article.url, article.urlToImage,Date(),"",1)
 
         // Display Neighbour Name
         holder.mArticleTitle.text = article.title
@@ -41,7 +41,7 @@ class FavoriteAdapter(
         holder.mArticleDescription.text = article.description
         holder.mArticleName.text    = article.author
 
-        holder.mArticleFavorite.setImageResource(R.drawable.ic_baseline_icon_delete_24)
+        holder.mArticleFavorite.setImageResource(R.drawable.ic_baseline_deleted_24)
 
         holder.mArticleTitle.setOnClickListener {
             handler.showArticle(details)
@@ -50,7 +50,7 @@ class FavoriteAdapter(
             handler.showArticle(details)
         }
         holder.mArticleFavorite.setOnClickListener(View.OnClickListener {
-            article.id?.let { it1 -> DB.remove_fav(it1) }
+            article.id?.let { it1 -> favDB.remove_fav(it1) }
             removeItem(position)
         })
 

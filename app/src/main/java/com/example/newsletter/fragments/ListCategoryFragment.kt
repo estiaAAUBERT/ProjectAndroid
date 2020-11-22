@@ -44,7 +44,7 @@ class ListCategoryFragment : Fragment() , SourceHandler {
 
     override fun showSource(source: String) {
         (activity as? NavigationListener)?.let {
-            it.showFragment(CategoryArticlesFragment())
+            it.showFragment(CategoryArticlesFragment(source))
             it.updateTitle(R.string.list_articles)
         }
     }
